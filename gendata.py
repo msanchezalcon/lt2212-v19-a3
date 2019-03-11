@@ -100,6 +100,12 @@ def ngrams_builder(file, n):
     return list(n_grams)
 
 
+def n_gram_vector():
+    """
+    Takes one-hot vectors from tokens and creates n-gram vectors (list of lists). Then convert that array into
+     a dataframe.
+    """
+
 
 
 
