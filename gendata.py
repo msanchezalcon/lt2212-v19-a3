@@ -3,6 +3,10 @@ import glob
 import argparse
 import numpy as np
 import pandas as pd
+from nltk import word_tokenize
+import re
+from sklearn.utils import shuffle
+from nltk import ngrams
 
 # gendata.py -- Don't forget to put a reasonable amount code comments
 # in so that we better understand what you're doing when we grade!
@@ -11,7 +15,8 @@ import pandas as pd
 # scikit-learn OneHotEncoder, or any related automatic one-hot encoders.
 
 parser = argparse.ArgumentParser(description="Convert text to features")
-parser.add_argument("-N", "--ngram", metavar="N", dest="ngram", type=int, default=3, help="The length of ngram to be considered (default 3).")
+parser.add_argument("-N", "--ngram", metavar="N", dest="ngram", type=int, default=3,
+                    help="The length of ngram to be considered (default 3).")
 parser.add_argument("-S", "--start", metavar="S", dest="startline", type=int,
                     default=0,
                     help="What line of the input data file to start from. Default is 0, the first line.")
@@ -34,6 +39,87 @@ else:
 
 print("Constructing {}-gram model.".format(args.ngram))
 print("Writing table to {}.".format(args.outputfile))
-    
+
 # THERE ARE SOME CORNER CASES YOU HAVE TO DEAL WITH GIVEN THE INPUT
 # PARAMETERS BY ANALYZING THE POSSIBLE ERROR CONDITIONS.
+
+
+
+def preprocessing_data(file):
+    """
+    Takes file, removes punctuation and divides it into tokens
+    Stores tokens in a sorted vocabulary list
+    """
+    vocab = []
+    with open(file,"r",encoding="utf8") as f:
+        file = f.read()
+        clean_text = re.sub(r"/[^\s]+", "", file)
+        clean_text = word_tokenize(clean_text)
+        for token in clean_text:
+            if token not in vocab:
+                vocab.append(token)
+
+    sorted_vocab = sorted(vocab)
+    map_tokens = {token: index for index, token in enumerate(sorted_vocab)}
+
+    #print(map_tokens)
+    return map_tokens
+
+
+
+def vector_builder(inputfile):
+    """
+     Creating one-hot encoding vectors from vocabulary.
+    """
+    map_tokens = preprocessing_data(inputfile)
+    onehot_vector_dict = {}
+    for token, index in map_tokens.items():
+        onehot_vector = [0] * len(map_tokens)
+        onehot_vector[index] = 1
+        onehot_vector_dict[token] = onehot_vector
+
+    #print(one_hot_vector_dict)
+    return onehot_vector_dict
+
+
+
+def split_data(file):
+    """
+    Splits tokens into train and test data and stores them into two separate lists.
+    """
+    with open(file,"r",encoding="utf8") as f:
+        file = f.read()
+        clean_text = re.sub(r"/[^\s]+", "", file)
+        clean_text = word_tokenize(clean_text)
+        train_split = 0.80
+        train_data, test_data = clean_text[:int(train_split * len(clean_text))], clean_text[int(train_split * len(clean_text)):]
+        train_data = shuffle(train_data)
+        test_data = shuffle(test_data)
+
+        return train_data, test_data
+
+
+def ngrams_builder(file, n):
+    """
+    Takes a list of tokens from the vocabulary list and returns n-grams as a list of tuples.
+    """
+    #with open(file, "r", encoding="utf8") as f:
+       # file = f.read()
+       # clean_text = re.sub(r"/[^\s]+", "", file)
+        #clean_text = word_tokenize(clean_text)
+    train_data, test_data = split_data(file)
+    n_grams = ngrams(train_data, n, pad_left=True, pad_right=True, left_pad_symbol="<s>", right_pad_symbol="<e>")
+    print(list(n_grams))
+    return list(n_grams)
+
+
+
+
+
+
+
+preprocessing_data(args.inputfile)
+split_data(args.inputfile)
+ngrams_builder(args.inputfile, args.ngram)
+vector_builder(args.inputfile)
+
