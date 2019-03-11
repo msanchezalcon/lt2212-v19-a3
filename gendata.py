@@ -3,16 +3,17 @@ import glob
 import argparse
 import numpy as np
 import pandas as pd
-from nltk import word_tokenize
-import re
-from sklearn.utils import shuffle
-from nltk import ngrams
+
 
 # gendata.py -- Don't forget to put a reasonable amount code comments
 # in so that we better understand what you're doing when we grade!
 
 # add whatever additional imports you may need here. You may not use the
 # scikit-learn OneHotEncoder, or any related automatic one-hot encoders.
+from nltk import word_tokenize
+import re
+from sklearn.utils import shuffle
+from nltk import ngrams
 
 parser = argparse.ArgumentParser(description="Convert text to features")
 parser.add_argument("-N", "--ngram", metavar="N", dest="ngram", type=int, default=3,
@@ -28,20 +29,6 @@ parser.add_argument("inputfile", type=str,
 parser.add_argument("outputfile", type=str,
                     help="The name of the output file for the feature table.")
 
-args = parser.parse_args()
-
-print("Loading data from file {}.".format(args.inputfile))
-print("Starting from line {}.".format(args.startline))
-if args.endline:
-    print("Ending at line {}.".format(args.endline))
-else:
-    print("Ending at last line of file.")
-
-print("Constructing {}-gram model.".format(args.ngram))
-print("Writing table to {}.".format(args.outputfile))
-
-# THERE ARE SOME CORNER CASES YOU HAVE TO DEAL WITH GIVEN THE INPUT
-# PARAMETERS BY ANALYZING THE POSSIBLE ERROR CONDITIONS.
 
 
 
@@ -50,7 +37,7 @@ def preprocessing_data(file):
     Takes file, removes punctuation and divides it into tokens
     Stores tokens in a sorted vocabulary list
     """
-    vocab = []
+    vocab = []'0'
     with open(file,"r",encoding="utf8") as f:
         file = f.read()
         clean_text = re.sub(r"/[^\s]+", "", file)
@@ -123,3 +110,17 @@ split_data(args.inputfile)
 ngrams_builder(args.inputfile, args.ngram)
 vector_builder(args.inputfile)
 
+args = parser.parse_args()
+
+print("Loading data from file {}.".format(args.inputfile))
+print("Starting from line {}.".format(args.startline))
+if args.endline:
+    print("Ending at line {}.".format(args.endline))
+else:
+    print("Ending at last line of file.")
+
+print("Constructing {}-gram model.".format(args.ngram))
+print("Writing table to {}.".format(args.outputfile))
+
+# THERE ARE SOME CORNER CASES YOU HAVE TO DEAL WITH GIVEN THE INPUT
+# PARAMETERS BY ANALYZING THE POSSIBLE ERROR CONDITIONS.
