@@ -2,12 +2,11 @@
 
 From Asad Sayeed's statistical NLP course at the University of Gothenburg.
 
-My name: YOUR NAME HERE
+My name: MIRIAM SANCHEZ ALCON
 
 ## Additional instructions
 
-Document here additional command-line instructions or other details you
-want us to know about running your code.
+Added new parsing argument -P por selecting percentage of text selected for training/testing.
 
 ## Reporting for Part 4
 
