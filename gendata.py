@@ -60,7 +60,7 @@ def split_data(file, startline, endline, percentage):
     """
     Splits text (tokens) into train and test data and stores them into two separate lists.
     We first define a chunk of text we will use and that chunk will be separated into train and test every time.
-    Always taking 80% randomly.
+    The selected percentage will be chosen through the -P parsing argument.
     """
     with open(file,"r",encoding="utf8") as f:
         file = f.read()
