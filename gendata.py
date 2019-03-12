@@ -26,7 +26,7 @@ def preprocessing_data(filepath):
     vocab = []
     with open(filepath,"r",encoding="utf8") as f:
         file = f.read()
-        clean_text = re.sub(r'([^\w\s\']|\n)', '', file)
+        clean_text = re.sub(r'/[^\s]+', '', file)
         clean_text = word_tokenize(clean_text)
         for token in clean_text:
             if token not in vocab:
@@ -35,12 +35,12 @@ def preprocessing_data(filepath):
     sorted_vocab = sorted(vocab)
     map_tokens = {token: index for index, token in enumerate(sorted_vocab)}
 
-    #print(map_tokens)
+    print(map_tokens)
     return map_tokens
 
 
 
-def vector_builder(inputfile):
+def onehot_vector_builder(inputfile):
     """
      Creating one-hot encoding vectors from vocabulary.
     """
@@ -56,7 +56,7 @@ def vector_builder(inputfile):
 
 
 
-def split_data(file, startline, endline):
+def split_data(file, startline, endline, percentage):
     """
     Splits text (tokens) into train and test data and stores them into two separate lists.
     We first define a chunk of text we will use and that chunk will be separated into train and test every time.
@@ -64,26 +64,23 @@ def split_data(file, startline, endline):
     """
     with open(file,"r",encoding="utf8") as f:
         file = f.read()
-        clean_text = re.sub(r'([^\w\s\']|\n)', '', file)
-        sent_token = sent_tokenize(clean_text)
+        clean_text = re.sub(r'/[^\s]+', '', file)
+        sentences = sent_tokenize(clean_text)
         if startline is not None:
-            sent_token = sent_token[startline:]
+            selected = sentences[startline:]
         if endline is not None:
-            sent_token = sent_token[:endline]
-    for sentence in sent_token:
-        tokens = word_tokenize(sentence)
+            selected = sentences[:endline]
+    for sentence in selected:
+        tokenized_sentences = word_tokenize(sentence)
 
-    train_split = 0.80
-    train_data, test_data = tokens[:int(train_split * len(tokens))], tokens[int(train_split * len(tokens)):]
+    train_data, test_data = tokenized_sentences[:int(percentage * len(tokenized_sentences))], tokenized_sentences[int(percentage * len(tokenized_sentences)):]
     train_data = shuffle(train_data) # randomizes selection every time
     test_data = shuffle(test_data)
 
-    print(tokens)
     return train_data, test_data
 
 
-
-def ngrams_builder(file, n, startline, endline):
+def ngrams_builder(file, n, startline, endline, percentage):
     """
     Takes a list of tokens from the vocabulary list and returns n-grams as a list of tuples.
     """
@@ -91,14 +88,13 @@ def ngrams_builder(file, n, startline, endline):
        # file = f.read()
        # clean_text = re.sub(r"/[^\s]+", "", file)
         #clean_text = word_tokenize(clean_text)
-    data = split_data(file, startline, endline)
+    data = split_data(file, startline, endline, percentage)
     n_grams = ngrams(data, n, pad_left=True, left_pad_symbol="<s>")
-    #print(n_grams)
     return list(n_grams)
 
 
 
-def vector_builder(ngrams, vectordict):
+def ngram_vector_builder(ngrams, vectordict):
     """
     Takes one-hot vectors from tokens and creates n-gram vectors (list of lists). Then convert that array into
     a dataframe.
@@ -139,6 +135,9 @@ parser.add_argument("-S", "--start", metavar="S", dest="startline", type=int,
 parser.add_argument("-E", "--end", metavar="E", dest="endline",
                     type=int, default=None,
                     help="What line of the input data file to end on. Default is None, whatever the last line is.")
+parser.add_argument("-P", "--percentage", metavar="P", dest="percentage", type=float,
+                    default=0,
+                    help="What percentage of the data should be used.")
 parser.add_argument("inputfile", type=str,
                     help="The file name containing the text data.")
 parser.add_argument("outputfile", type=str,
@@ -159,10 +158,11 @@ print("Writing table to {}.".format(args.outputfile))
 # THERE ARE SOME CORNER CASES YOU HAVE TO DEAL WITH GIVEN THE INPUT
 # PARAMETERS BY ANALYZING THE POSSIBLE ERROR CONDITIONS.
 
-vocabdict = preprocessing_data(args.inputfile)
-vectordict = vector_builder(args.inputfile)
-ngrams = ngrams_builder(args.inputfile, args.ngrams, args.startline, args.endline)
-vector_builder(ngrams, vectordict)
-split_data(args.inputfile, args.startline, args.endline)
-ngrams_builder(args.inputfile, args.ngram, args.startline, args.endline)
-file_builder(args.outputfile)
+# Global variables to be used again
+#vocabdict = preprocessing_data(args.inputfile)
+#vectordict = onehot_vector_builder(args.inputfile)
+#ngrams = ngrams_builder(args.inputfile, args.ngram, args.startline, args.endline, args.percentage)
+#ngram_vector_builder(ngrams, vectordict)
+#split_data(args.inputfile, args.startline, args.endline, args.percentage)
+#ngrams_builder(args.inputfile, args.ngram, args.startline, args.endline)
+#file_builder(args.outputfile)
