@@ -6,7 +6,6 @@ My name: MIRIAM SANCHEZ ALCON
 
 ## Additional instructions
 
-Added new parsing argument -P por selecting percentage of text selected for training/testing.
 
 ## Reporting for Part 4
 
